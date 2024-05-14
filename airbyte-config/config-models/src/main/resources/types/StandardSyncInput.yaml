@@ -1,0 +1,70 @@
+---
+"$schema": http://json-schema.org/draft-07/schema#
+"$id": https://github.com/airbytehq/airbyte/blob/master/airbyte-config/models/src/main/resources/types/StandardSyncInput.yaml
+title: StandardSyncInput
+description: job sync config
+type: object
+additionalProperties: true
+required:
+  - sourceId
+  - sourceConfiguration
+  - destinationId
+  - destinationConfiguration
+properties:
+  namespaceDefinition:
+    "$ref": NamespaceDefinitionType.yaml
+  namespaceFormat:
+    type: string
+    default: null
+    example: "${SOURCE_NAMESPACE}"
+  prefix:
+    description: Prefix that will be prepended to the name of each stream when it is written to the destination.
+    type: string
+  sourceId:
+    description: Actor ID for the source used in the sync - this is used to update the actor configuration when requested.
+    type: string
+    format: uuid
+  destinationId:
+    description: Actor ID for the destination used in the sync - this is used to update the actor configuration when requested.
+    type: string
+    format: uuid
+  sourceConfiguration:
+    description: Integration specific blob. Must be a valid JSON string.
+    type: object
+    existingJavaType: com.fasterxml.jackson.databind.JsonNode
+  destinationConfiguration:
+    description: Integration specific blob. Must be a valid JSON string.
+    type: object
+    existingJavaType: com.fasterxml.jackson.databind.JsonNode
+  operationSequence:
+    description: Sequence of configurations of operations to apply as part of the sync
+    type: array
+    items:
+      "$ref": StandardSyncOperation.yaml
+  webhookOperationConfigs:
+    description: The webhook operation configs belonging to this workspace. See webhookOperationConfigs in StandardWorkspace.yaml.
+    type: object
+    existingJavaType: com.fasterxml.jackson.databind.JsonNode
+  syncResourceRequirements:
+    description: Resource requirements to use for the sync
+    $ref: SyncResourceRequirements.yaml
+  workspaceId:
+    description: The id of the workspace associated with this sync
+    type: string
+    format: uuid
+  connectionId:
+    description: The id of the connection associated with this sync
+    type: string
+    format: uuid
+  normalizeInDestinationContainer:
+    description: whether normalization should be run in the destination container
+    type: boolean
+    default: false
+  isReset:
+    description: whether this 'sync' is performing a logical reset
+    type: boolean
+    default: false
+  connectionContext:
+    description: Context object with IDs of the relevant connection, source, destination, etc.
+    type: object
+    "$ref": ConnectionContext.yaml

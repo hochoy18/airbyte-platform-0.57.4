@@ -1,0 +1,28 @@
+server {
+    listen       8080;
+    listen  [::]:8080;
+    server_name  localhost;
+
+    gzip on;
+    gzip_types text/html text/css text/plain application/javascript;
+    gzip_proxied any;
+
+    add_header Content-Security-Policy "script-src * 'unsafe-inline'; worker-src 'self' blob:;";
+    
+    location / {
+        root   /usr/share/nginx/html;
+        
+        location ~ ^/docs/.* {
+            try_files $uri $uri/ =404;
+        }
+
+        location ~ ^/(?!(assets/.*)) {
+            try_files $uri $uri/ /index.html;
+        }
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+}

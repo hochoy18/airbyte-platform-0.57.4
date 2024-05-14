@@ -1,0 +1,52 @@
+@use "scss/variables";
+@use "scss/colors";
+
+.itemLabel {
+  flex-grow: 1;
+}
+
+.itemButton {
+  background: none !important;
+  border: none !important;
+  padding: variables.$spacing-xs;
+}
+
+.inputsDescription {
+  margin-top: variables.$spacing-lg;
+  margin-bottom: variables.$spacing-lg;
+  white-space: pre-line;
+}
+
+.addInputButton {
+  margin-top: variables.$spacing-lg;
+  align-self: center;
+}
+
+.inputCard {
+  display: flex;
+  align-items: center;
+  padding: variables.$spacing-sm variables.$spacing-md;
+  gap: variables.$spacing-md;
+  cursor: grab;
+
+  &:hover {
+    background-color: colors.$grey-40;
+  }
+
+  &[aria-pressed="true"] {
+    background-color: colors.$blue-40;
+    cursor: grabbing;
+    box-shadow: variables.$box-shadow-raised;
+  }
+}
+
+.fieldset {
+  all: unset;
+  width: 100%;
+
+  &[disabled] {
+    *:hover {
+      cursor: default;
+    }
+  }
+}

@@ -1,0 +1,17 @@
+@use "scss/colors";
+@use "scss/variables";
+
+.adminWorkspaceTooltipWrapper {
+  display: flex;
+}
+
+.adminWorkspaceWarning {
+  width: 100%;
+  background-color: colors.$red-400;
+  cursor: help;
+
+  &__pill {
+    width: 100%;
+    padding: variables.$spacing-sm;
+  }
+}

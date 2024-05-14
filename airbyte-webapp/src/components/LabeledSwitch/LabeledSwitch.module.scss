@@ -1,0 +1,42 @@
+@use "scss/colors";
+@use "scss/variables";
+
+.labeledSwitch {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.label {
+  padding-left: 7px;
+  font-size: variables.$font-size-md;
+  line-height: 1.2;
+  cursor: pointer;
+  color: colors.$dark-blue;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  & label {
+    cursor: pointer;
+  }
+
+  &.disabled {
+    color: colors.$grey-300;
+    cursor: not-allowed;
+
+    & label {
+      cursor: not-allowed;
+    }
+  }
+}
+
+.additionalMessage {
+  padding-left: 5px;
+  color: colors.$grey-300;
+
+  & a {
+    text-decoration: underline;
+    color: colors.$blue;
+  }
+}

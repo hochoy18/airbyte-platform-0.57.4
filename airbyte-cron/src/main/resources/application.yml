@@ -1,0 +1,180 @@
+micronaut:
+  application:
+    name: airbyte-cron
+  caches:
+    # used by the analytics tracking client to cache calls to resolve the deployment and identity (workspace) for
+    # track events
+    analytics-tracking-deployments:
+      charset: "UTF-8"
+      expire-after-access: 10m
+    analytics-tracking-identity:
+      charset: "UTF-8"
+      expire-after-access: 10m
+    remote-definitions-provider:
+      expire-after-write: 15s
+  env:
+    cloud-deduction: true
+  metrics:
+    enabled: ${MICROMETER_METRICS_ENABLED:false}
+    export:
+      statsd:
+        enabled: ${MICROMETER_METRICS_ENABLED:false}
+        flavor: ${MICROMETER_METRICS_STATSD_FLAVOR:datadog}
+        step: ${MICROMETER_METRICS_STEP:PT30S}
+        host: ${STATSD_HOST:localhost}
+        port: ${STATSD_PORT:8125}
+  server:
+    port: 9001
+
+airbyte:
+  connector-registry:
+    seed-provider: ${CONNECTOR_REGISTRY_SEED_PROVIDER:local}
+    remote:
+      base-url: ${CONNECTOR_REGISTRY_BASE_URL:}
+      timeout-ms: ${CONNECTOR_REGISTRY_TIMEOUT_MS:30000}
+  cron:
+    update-definitions:
+      enabled: ${UPDATE_DEFINITIONS_CRON_ENABLED:false}
+  deployment-mode: ${DEPLOYMENT_MODE:OSS}
+  feature-flag:
+    client: ${FEATURE_FLAG_CLIENT:}
+    path: ${FEATURE_FLAG_PATH:/flags}
+    api-key: ${LAUNCHDARKLY_KEY:}
+  flyway:
+    configs:
+      initialization-timeout-ms: ${CONFIGS_DATABASE_INITIALIZATION_TIMEOUT_MS:60000}
+      minimum-migration-version: ${CONFIGS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION}
+  local:
+    docker-mount: ${LOCAL_DOCKER_MOUNT:}
+    root: ${LOCAL_ROOT}
+  protocol:
+    min-version: ${AIRBYTE_PROTOCOL_VERSION_MIN:0.0.0}
+    max-version: ${AIRBYTE_PROTOCOL_VERSION_MAX:0.3.0}
+  role: ${AIRBYTE_ROLE:}
+  temporal:
+    worker:
+      ports: ${TEMPORAL_WORKER_PORTS:}
+  tracking:
+    strategy: ${TRACKING_STRATEGY:LOGGING}
+    write-key: ${SEGMENT_WRITE_KEY:}
+  version: ${AIRBYTE_VERSION}
+  workflow:
+    failure:
+      restart-delay: ${WORKFLOW_FAILURE_RESTART_DELAY_SECONDS:600}
+  workload:
+    monitor:
+      enabled: ${WORKLOAD_MONITOR_ENABLED:false}
+      claim-check-rate: PT1M
+      heartbeat-check-rate: PT1M
+      not-started-check-rate: PT1M
+      non-sync-age-check-rate: PT1M
+      sync-age-check-rate: PT1M
+      non-sync-workload-timeout: ${NON_SYNC_WORKLOAD_TIMEOUT:PT4H} # Should be longer than the sum of the deadlines
+      sync-workload-timeout: ${SYNC_WORKLOAD_TIMEOUT:P30D} # Should be longer than the sum of the deadlines
+  workload-api:
+    base-path: ${WORKLOAD_API_HOST:}
+    bearer-token: ${WORKLOAD_API_BEARER_TOKEN:}
+    connect-timeout-seconds: ${WORKLOAD_API_CONNECT_TIMEOUT_SECONDS:30}
+    read-timeout-seconds: ${WORKLOAD_API_READ_TIMEOUT_SECONDS:300}
+    retries:
+      delay-seconds: ${WORKLOAD_API_RETRY_DELAY_SECONDS:2}
+      max: ${WORKLOAD_API_MAX_RETRIES:5}
+  workspace:
+    docker-mount: ${WORKSPACE_DOCKER_MOUNT:}
+    root: ${WORKSPACE_ROOT}
+
+datasources:
+  config:
+    connection-test-query: SELECT 1
+    connection-timeout: 30000
+    idle-timeout: 600000
+    initialization-fail-timeout: -1 # Disable fail fast checking to avoid issues due to other pods not being started in time
+    maximum-pool-size: 5
+    minimum-idle: 0
+    url: ${DATABASE_URL}
+    driverClassName: org.postgresql.Driver
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+  jobs:
+    connection-test-query: SELECT 1
+    connection-timeout: 30000
+    idle-timeout: 600000
+    initialization-fail-timeout: -1 # Disable fail fast checking to avoid issues due to other pods not being started in time
+    maximum-pool-size: 5
+    minimum-idle: 0
+    url: ${DATABASE_URL}
+    driverClassName: org.postgresql.Driver
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+
+docker:
+  network: ${DOCKER_NETWORK:host}
+
+endpoints:
+  beans:
+    enabled: true
+    sensitive: false
+  caches:
+    enabled: true
+    sensitive: false
+  env:
+    enabled: true
+    sensitive: false
+  health:
+    enabled: true
+    sensitive: false
+  info:
+    enabled: true
+    sensitive: true
+  loggers:
+    enabled: true
+    sensitive: true
+  metrics:
+    enabled: ${MICROMETER_METRICS_ENABLED:false}
+    sensitive: false
+  refresh:
+    enabled: false
+    sensitive: true
+  routes:
+    enabled: true
+    sensitive: false
+  threaddump:
+    enabled: true
+    sensitive: true
+
+flyway:
+  enabled: true
+  datasources:
+    config:
+      enabled: false
+      locations:
+        - "classpath:io/airbyte/db/instance/configs/migrations"
+    jobs:
+      enabled: false
+      locations:
+        - "classpath:io/airbyte/db/instance/jobs/migrations"
+
+jooq:
+  datasources:
+    config:
+      jackson-converter-enabled: true
+      sql-dialect: POSTGRES
+    jobs:
+      jackson-converter-enabled: true
+      sql-dialect: POSTGRES
+
+temporal:
+  cloud:
+    client:
+      cert: ${TEMPORAL_CLOUD_CLIENT_CERT:}
+      key: ${TEMPORAL_CLOUD_CLIENT_KEY:}
+    enabled: ${TEMPORAL_CLOUD_ENABLED:false}
+    host: ${TEMPORAL_CLOUD_HOST:}
+    namespace: ${TEMPORAL_CLOUD_NAMESPACE:}
+  host: ${TEMPORAL_HOST:`airbyte-temporal:7233`}
+  retention: ${TEMPORAL_HISTORY_RETENTION_IN_DAYS:30}
+
+logger:
+  levels:
+# Uncomment to help resolve issues with conditional beans
+#    io.micronaut.context.condition: DEBUG

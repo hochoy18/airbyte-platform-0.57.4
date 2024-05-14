@@ -1,0 +1,196 @@
+// The buildscript block defines dependencies in order for .gradle file evaluation.
+// This is separate from application dependencies.
+// See https://stackoverflow.com/questions/17773817/purpose-of-buildscript-block-in-gradle.
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+//        classpath 'com.bmuschko:gradle-docker-plugin:8.0.0'
+//        // 6.x version of OpenApi generator is only compatible with jackson-core 2.13.x onwards.
+//        // This conflicts with the jackson depencneis the bmuschko plugin is pulling in.
+//        // Since api generation is only used in the airbyte-api module and the base gradle files
+//        // are loaded in first, Gradle is not able to intelligently resolve this before loading in
+//        // the bmuschko plugin and thus placing an older jackson version on the class path.
+//        // The alternative is to import the openapi plugin for all modules.
+//        // This might need to be updated when we change openapi plugin versions.
+//        classpath 'com.fasterxml.jackson.core:jackson-core:2.13.0'
+//
+        classpath 'org.codehaus.groovy:groovy-yaml:3.0.3'
+    }
+}
+
+plugins {
+    id "base"
+    id "com.dorongold.task-tree" version "2.1.1"
+    id "io.airbyte.gradle.jvm" version "0.32.0" apply false
+    id "io.airbyte.gradle.jvm.app" version "0.32.0" apply false
+    id "io.airbyte.gradle.jvm.lib" version "0.32.0" apply false
+    id "io.airbyte.gradle.docker" version "0.32.0" apply false
+    id "io.airbyte.gradle.publish" version "0.32.0" apply false
+    // uncomment for testing plugin locally
+    // id "io.airbyte.gradle.jvm" version "local-test" apply false
+    // id "io.airbyte.gradle.jvm.app" version "local-test" apply false
+    // id "io.airbyte.gradle.jvm.lib" version "local-test" apply false
+    // id "io.airbyte.gradle.docker" version "local-test" apply false
+    // id "io.airbyte.gradle.publish" version "local-test" apply false
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://airbyte.mycloudrepo.io/public/repositories/airbyte-public-jars/'
+    }
+    maven {
+        name = 'cloudrepo'
+        url = 'https://airbyte.mycloudrepo.io/repositories/airbyte-public-jars'
+        credentials {
+            username System.getenv('CLOUDREPO_USER')
+            password System.getenv('CLOUDREPO_PASSWORD')
+        }
+    }
+}
+
+if (System.getProperty("ciMode", "false") == "true") {
+    gradle.startParameter.logLevel = LogLevel.QUIET
+
+    def logFile = new FileOutputStream('gradle.log', true)
+    gradle.services.get(LoggingManager).addStandardOutputListener(logFile)
+    gradle.services.get(LoggingManager).addStandardErrorListener(logFile)
+
+    allprojects {
+        tasks.withType(JavaCompile) {
+            options.deprecation = false
+            options.warnings = false
+        }
+    }
+}
+
+Properties env = new Properties()
+rootProject.file('.env.dev').withInputStream { env.load(it) }
+
+if (!env.containsKey('VERSION')) {
+    throw new Exception('Version not specified in .env file...')
+}
+
+// `version` is used as the application build version for artifacts like jars
+// `image_tag` is used as the docker tag applied to built images.
+// These values are the same for building an specific Airbyte release or branch via the 'VERSION' environment variable.
+// For local development builds, the 'VERSION' environment variable is unset, and built images are tagged with 'dev'.
+ext {
+    version = System.getenv("VERSION") ?: env.VERSION
+    image_tag = System.getenv("VERSION") ?: 'dev'
+}
+
+allprojects {
+    // by default gradle uses directory as the project name. That works very well in a single project environment but
+    // projects clobber each other in an environments with subprojects when projects are in directories named identically.
+    def sub = rootDir.relativePath(projectDir.parentFile).replace('/', '.')
+    group = "io.airbyte${sub.isEmpty() ? '' : ".$sub"}"
+
+    version = rootProject.ext.version
+}
+
+tasks.register('archiveReports', Tar) {
+    dependsOn subprojects.collect { it.getTasksByName('checkstyleMain', true) }
+    dependsOn subprojects.collect { it.getTasksByName('checkstyleTest', true) }
+    dependsOn subprojects.collect { it.getTasksByName('jacocoTestReport', true) }
+    dependsOn subprojects.collect { it.getTasksByName('pmdMain', true) }
+    dependsOn subprojects.collect { it.getTasksByName('pmdTest', true) }
+    dependsOn subprojects.collect { it.getTasksByName('spotbugsMain', true) }
+    dependsOn subprojects.collect { it.getTasksByName('spotbugsTest', true) }
+    dependsOn subprojects.collect { it.getTasksByName('test', true) }
+    dependsOn subprojects.collect { it.getTasksByName('checkstyleAcceptanceTests', true) }
+    dependsOn subprojects.collect { it.getTasksByName('pmdAcceptanceTests', true) }
+    dependsOn subprojects.collect { it.getTasksByName('spotbugsAcceptanceTests', true) }
+
+    archiveFileName = "${project.name}-reports.tar"
+    destinationDirectory = layout.buildDirectory.dir('dist')
+
+    // Collect reports from each subproject
+    subprojects.each { subproject ->
+        from("${subproject.buildDir}/reports") {
+            into("${subproject.name}/reports")
+        }
+    }
+}
+
+subprojects { sp ->
+    // airbyte-webapp has not been converted to the gradle plugins
+    if (sp.name != "airbyte-webapp") {
+        return
+    }
+
+    apply plugin: 'base'
+
+//    configurations {
+//        runtimeClasspath
+//    }
+
+    tasks.register("copyDocker", Copy) {
+        from "${project.projectDir}/Dockerfile"
+        into "build/docker/"
+    }
+
+    // Although this task is defined for every subproject with the dockerImageName property,
+    // It is not necessarily used for all subprojects. Non-TAR producing projects can ignore this.
+    tasks.register("copyGeneratedTar", Copy) {
+        dependsOn tasks.named("copyDocker")
+//        dependsOn copyWellKnownTypes
+        dependsOn tasks.named("distTar")
+        from('build/distributions') {
+            // Assume that tars are named <parent-project-name>-<child-project-name>-*.tar.
+            // Because we only have a handle to the child project, and to keep things simple,
+            // use a * regex to catch all prefixes.
+            include "*$sp.name-*.tar"
+        }
+        into 'build/docker/bin'
+    }
+
+    tasks.register("buildDockerImage", com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
+        // This is currently only used for connectors.
+        def jdkVersion = System.getenv('JDK_VERSION') ?: '17.0.4'
+
+        def arch = System.getenv('BUILD_ARCH') ?: System.getProperty("os.arch").toLowerCase()
+        def isArm64 = arch == "aarch64" || arch == "arm64"
+        def buildArch = System.getenv('DOCKER_BUILD_ARCH') ?: isArm64 ? 'arm64' : 'amd64'
+        def buildPlatform = System.getenv('DOCKER_BUILD_PLATFORM') ?: isArm64 ? 'linux/arm64' : 'linux/amd64'
+        def alpineImage = System.getenv('ALPINE_IMAGE') ?: isArm64 ? 'arm64v8/alpine:3.14' : 'amd64/alpine:3.14'
+
+        // Used by the platform -- Must be an Amazon Corretto-based image for build to work without modification to Dockerfile instructions
+        def openjdkImage = System.getenv('JDK_IMAGE') ?: 'airbyte/airbyte-base-java-image:3.2.1'
+
+        platform = buildPlatform
+        images.add("airbyte/$sp.dockerImageName:$rootProject.ext.image_tag")
+        buildArgs.put('JDK_VERSION', jdkVersion)
+        buildArgs.put('DOCKER_BUILD_ARCH', buildArch)
+        buildArgs.put('ALPINE_IMAGE', alpineImage)
+        buildArgs.put('JDK_IMAGE', openjdkImage)
+        buildArgs.put('VERSION', rootProject.ext.version)
+
+    }
+
+    tasks.named("assemble") {
+        dependsOn tasks.named("buildDockerImage")
+    }
+
+    tasks.register("dockerBuildImage") {
+        dependsOn tasks.named("buildDockerImage")
+    }
+}
+
+
+tasks.register('generate-docker') {
+    dependsOn(':airbyte-bootloader:assemble')
+    dependsOn(':airbyte-workers:assemble')
+    dependsOn(':airbyte-webapp:assemble')
+    dependsOn(':airbyte-server:assemble')
+    dependsOn(':airbyte-api-server:assemble')
+    dependsOn(':airbyte-db:db-lib:assemble')
+    dependsOn(':airbyte-config:init:assemble')
+    dependsOn(':airbyte-temporal:assemble')
+    dependsOn(':airbyte-keycloak:assemble')
+    dependsOn(':airbyte-keycloak-setup:assemble')
+}

@@ -1,0 +1,78 @@
+import { Canvas, Controls, Meta, Story } from "@storybook/addon-docs";
+import * as IconStories from "./Icon.stories.tsx";
+import { Icon } from "./Icon";
+import { IconConverter } from "./Icon.docs-utils";
+import { FlexContainer, FlexItem } from "../Flex";
+import styles from "./Icon.docs.module.scss";
+
+<Meta of={IconStories} />
+
+# Icon
+
+<Icon type="moon" color="success" size="lg" />
+<Icon type="moon" color="success" size="lg" withBackground />
+
+```typescript
+<Icon type="moon" color="success" size="lg" />
+
+<Icon type="moon" color="success" size="lg" withBackground />
+```
+
+<div style={{ display: 'flex', columnGap: 50, flexFlow: 'row wrap' }}>
+  <div>
+    ## Sizes
+|                                  | size         | when used alongside text               |
+| -------------------------------- | ------------ | -------------------------------------- |
+| <Icon type="pencil" size="xs" /> | xs           |                                        |
+| <Icon type="pencil" size="sm" /> | sm           |                                        |
+| <Icon type="pencil" size="md" /> | md (default) | matches flow of text                   |
+| <Icon type="pencil" size="lg" /> | lg           | roughly fills line height              |
+| <Icon type="pencil" size="xl" /> | xl           | expands line height in both directions |
+
+  </div>
+
+  <div>
+    ## Colors
+|                                         | color                 |
+| --------------------------------------- | --------------------- |
+| <Icon type="pencil" />                  | `undefined` (default) |
+| <Icon type="pencil" color="primary" />  | primary               |
+| <Icon type="pencil" color="disabled" /> | disabled              |
+| <Icon type="pencil" color="action" />   | action                |
+| <Icon type="pencil" color="success" />  | success               |
+| <Icon type="pencil" color="error" />    | error                 |
+| <Icon type="pencil" color="warning" />  | warning               |
+
+  </div>
+</div>
+
+## 🛝 Playground
+
+<Canvas of={IconStories.Primary} />
+
+<Controls of={IconStories.Primary} />
+
+## All icons
+
+<div className={styles.iconGrid}>
+  {Icon.__docgenInfo.props.type.type.value.sort((a, b) => {
+    if (a.value < b.value) return -1;
+    if (a.value > b.value) return 1;
+    return 0;
+  }).map(({ value: icon }) => {
+    const iconName = icon.replace(/"/g, "");
+
+    return (
+      <FlexContainer key={icon} alignItems="center" justifyContent="center" direction="column" className={styles.iconGridItem}>
+        <FlexItem><Icon type={iconName} size="lg" /></FlexItem>
+        <FlexItem>{iconName}</FlexItem>
+      </FlexContainer>
+    );
+
+})}
+
+</div>
+
+## Convert an icon
+
+<IconConverter />

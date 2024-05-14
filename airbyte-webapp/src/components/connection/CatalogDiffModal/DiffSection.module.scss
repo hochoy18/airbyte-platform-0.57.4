@@ -1,0 +1,48 @@
+@use "scss/colors";
+@use "scss/variables";
+@use "./StreamRow.module.scss";
+
+.sectionContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.table {
+  border-spacing: 0;
+}
+
+.sectionSubHeader,
+%sectionSubHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 variables.$spacing-lg;
+  width: 100%;
+  height: 22px;
+
+  & th {
+    @extend %nameCell;
+
+    text-align: left;
+    font-weight: 400;
+    font-size: 10px;
+    color: colors.$grey;
+    line-height: 12px;
+  }
+
+  & .namespaceHeader {
+    padding-left: 25px;
+  }
+
+  & .nameHeader {
+    padding-left: variables.$spacing-md;
+  }
+}
+
+.sectionHeader,
+%sectionHeader {
+  font-size: variables.$font-size-lg;
+  font-weight: 500;
+  line-height: 1.2;
+  padding: variables.$spacing-lg variables.$spacing-xl;
+}

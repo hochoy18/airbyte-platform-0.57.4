@@ -1,0 +1,11 @@
+@use "scss/variables";
+@use "scss/colors";
+
+.title {
+  flex-shrink: 0;
+}
+
+:export {
+  // Safari needs an explicit height be passed to Monaco, likely due to the flexbox layout
+  stateEditorHeight: 400px;
+}

@@ -1,0 +1,69 @@
+@use "scss/variables";
+@use "scss/colors";
+
+@keyframes spinning {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+$colorMap: (
+  "primary": colors.$blue,
+  "disabled": colors.$grey,
+  "action": colors.$grey,
+  "success": colors.$green,
+  "error": colors.$red,
+  "warning": colors.$yellow,
+  "affordance": colors.$dark-blue,
+);
+
+$iconClassname: "icon";
+
+.#{$iconClassname} {
+  display: inline-block;
+
+  &.#{$iconClassname}--spinning {
+    animation: spinning 1.5s linear 0s infinite;
+  }
+
+  &.#{$iconClassname}--withBackground {
+    color: colors.$foreground;
+    box-sizing: content-box;
+    border-radius: variables.$border-radius-pill;
+    padding: 4px;
+    background-color: colors.$inverse; // default if color isn't specified
+  }
+
+  @each $name, $color in $colorMap {
+    &--#{$name} {
+      color: $color;
+
+      &.#{$iconClassname}--withBackground {
+        background-color: $color;
+      }
+    }
+  }
+}
+
+$sizes:
+  "xs" 12px -6% -30%,
+  "sm" 16px -18% -35%,
+  "md" 20px -28% -42%,
+  "lg" 24px -40% -58%,
+  "xl" 28px -50% -69%;
+
+@each $name, $size, $verticalAlign, $verticalAlignWithBackground in $sizes {
+  .#{$name} {
+    height: $size;
+    width: $size;
+    vertical-align: #{$verticalAlign};
+
+    &.#{$iconClassname}--withBackground {
+      vertical-align: #{$verticalAlignWithBackground};
+    }
+  }
+}

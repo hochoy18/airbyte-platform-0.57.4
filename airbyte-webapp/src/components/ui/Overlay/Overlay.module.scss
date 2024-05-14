@@ -1,0 +1,12 @@
+@use "scss/colors";
+@use "scss/z-indices";
+
+.container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: z-indices.$overlay;
+  background: colors.$overlay-background;
+}

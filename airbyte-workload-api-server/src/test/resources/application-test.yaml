@@ -1,0 +1,42 @@
+micronaut:
+  metrics:
+    enabled: false
+  security:
+    enabled: false
+  netty:
+    event-loops:
+      other:
+        num-threads: 1
+        prefer-native-transport: true
+  http:
+    client:
+      event-loop-group: other
+
+airbyte:
+  flyway:
+    workload:
+      initialization-timeout-ms: 60000
+      minimum-migration-version: "0.40.23.002"
+  workspace:
+    root: /tmp
+  shutdown:
+    delay_ms: 0
+
+datasources:
+  workload:
+    url: jdbc:h2:mem:default
+    driverClassName: org.h2.Driver
+    username: sa
+    password: ""
+
+jooq:
+  datasources:
+    workload:
+      jackson-converter-enabled: true
+      sql-dialect: POSTGRES
+
+logger:
+  levels:
+    io.micronaut.context.condition: INFO
+    io.micronaut.data.query: TRACE
+    io.micronaut.http.client: TRACE

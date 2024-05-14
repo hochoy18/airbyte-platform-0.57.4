@@ -1,0 +1,12 @@
+@use "scss/variables";
+@use "scss/colors";
+
+.text {
+  width: 100%;
+  font-weight: 500;
+  color: colors.$grey;
+
+  &.enabled {
+    color: colors.$dark-blue;
+  }
+}

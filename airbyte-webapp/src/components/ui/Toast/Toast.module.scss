@@ -1,0 +1,45 @@
+@use "scss/colors";
+@use "scss/variables";
+
+.toastContainer {
+  box-shadow: variables.$box-shadow-raised;
+  max-width: variables.$width-max-notification;
+  border-radius: variables.$border-radius-md;
+  border-width: 1px;
+  border-style: solid;
+  position: relative;
+
+  &--timeout {
+    &::after {
+      content: " ";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+
+      // Use as a background color the primary color of the message as set via the Message component
+      background-color: var(--message-color);
+      animation: timeout-bar forwards 5s linear;
+    }
+
+    &:hover::after {
+      animation-play-state: paused;
+    }
+  }
+}
+
+@keyframes timeout-bar {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0;
+  }
+}
+
+.toastText {
+  max-height: 150px;
+  overflow-y: auto;
+}

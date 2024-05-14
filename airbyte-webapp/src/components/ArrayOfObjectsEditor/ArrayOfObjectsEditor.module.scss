@@ -1,0 +1,7 @@
+@use "scss/colors";
+@use "scss/variables";
+
+.list {
+  border-radius: variables.$border-radius-xs;
+  overflow: hidden;
+}

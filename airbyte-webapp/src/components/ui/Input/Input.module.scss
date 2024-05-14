@@ -1,0 +1,89 @@
+@use "scss/colors";
+@use "scss/variables";
+
+.container {
+  width: 100%;
+  position: relative;
+  border: variables.$border-thin solid colors.$grey-200;
+  border-radius: variables.$border-radius-sm;
+
+  &.light {
+    background-color: colors.$foreground;
+    border: variables.$border-thin solid colors.$grey-100;
+
+    &.inline {
+      border-right-width: 0;
+      border-left-width: 0;
+      border-radius: 0;
+    }
+  }
+
+  &.error {
+    border-color: colors.$red-200;
+  }
+
+  &.disabled,
+  &.readOnly {
+    cursor: not-allowed;
+    border-color: colors.$grey-100;
+  }
+
+  &:not(.disabled, .readOnly, .focused):hover {
+    border-color: colors.$grey-300;
+
+    &.light {
+      background-color: colors.$foreground;
+    }
+
+    &.error {
+      border-color: colors.$red;
+    }
+  }
+
+  &.focused {
+    border-color: colors.$blue;
+
+    &.light {
+      background-color: colors.$foreground;
+    }
+  }
+}
+
+.input {
+  outline: none;
+  width: 100%;
+  padding: 7px 8px;
+  font-size: variables.$font-size-lg;
+  line-height: 1.4;
+  font-weight: normal;
+  border: none;
+  background: none;
+  color: colors.$dark-blue;
+  caret-color: colors.$blue-700;
+
+  &:not(.disabled).password {
+    width: calc(100% - 22px);
+  }
+
+  &::placeholder {
+    color: colors.$grey-300;
+  }
+
+  &.disabled,
+  &.readOnly {
+    pointer-events: none;
+    color: colors.$grey-300;
+  }
+}
+
+button.visibilityButton {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  height: 100%;
+  width: 40px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}

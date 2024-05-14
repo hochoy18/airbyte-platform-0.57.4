@@ -1,0 +1,48 @@
+@use "scss/colors";
+
+.heading {
+  font-weight: 700;
+  margin: 0;
+  padding: 0;
+
+  &.inverse {
+    color: colors.$foreground;
+  }
+}
+
+// sizes
+.sm {
+  font-size: 16px;
+  line-height: 1.2em;
+}
+
+.md,
+.lg,
+.xl {
+  line-height: 1.3em;
+}
+
+.md {
+  font-size: 20px;
+}
+
+.lg {
+  font-size: 24px;
+}
+
+.xl {
+  font-size: 32px;
+}
+
+// colors
+.darkBlue {
+  color: colors.$dark-blue;
+}
+
+.blue {
+  color: colors.$blue;
+}
+
+.centered {
+  text-align: center;
+}

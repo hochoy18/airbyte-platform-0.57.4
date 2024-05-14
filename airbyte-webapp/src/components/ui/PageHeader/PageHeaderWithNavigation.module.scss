@@ -1,0 +1,16 @@
+@use "scss/variables";
+@use "scss/colors";
+
+.container {
+  background-color: colors.$foreground;
+}
+
+.section {
+  border-bottom: variables.$border-thin solid colors.$grey-100;
+}
+
+.breadcrumbs {
+  height: variables.$height-breadcrumb;
+  display: flex;
+  align-items: center;
+}

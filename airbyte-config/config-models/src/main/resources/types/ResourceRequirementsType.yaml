@@ -1,0 +1,16 @@
+---
+"$schema": http://json-schema.org/draft-07/schema#
+"$id": https://github.com/airbytehq/airbyte/blob/master/airbyte-config/models/src/main/resources/types/ResourceRequirementsType.yaml
+title: ResourceRequirementsType
+description: ResourceRequirements types.
+type: string
+enum:
+  - Destination
+  - DestinationStdin
+  - DestinationStderr
+  - DestinationStdout
+  - Heartbeat
+  - Orchestrator
+  - Source
+  - SourceStderr
+  - SourceStdout

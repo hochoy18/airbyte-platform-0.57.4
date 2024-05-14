@@ -1,0 +1,108 @@
+@use "scss/colors";
+@use "scss/mixins";
+@use "scss/variables";
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: variables.$spacing-md;
+  height: 35px;
+  font-size: variables.$font-size-sm;
+}
+
+.content {
+  display: flex;
+  width: 100%;
+  height: 35px;
+  border-bottom: 1px solid colors.$foreground;
+  align-items: center;
+
+  &.add {
+    background-color: colors.$green-50;
+  }
+
+  &.remove {
+    background-color: colors.$red-50;
+  }
+}
+
+tr:first-child .content {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+tr:last-child .content {
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.icon {
+  &.plus {
+    color: colors.$green;
+  }
+
+  &.minus {
+    color: colors.$red;
+  }
+
+  &.mod {
+    color: colors.$blue-100;
+    margin-left: -5px;
+  }
+
+  &.breakingChange {
+    color: colors.$red;
+  }
+}
+
+.iconContainer {
+  width: 10px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  margin: 0 variables.$spacing-md;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+}
+
+.fieldName {
+  @include mixins.overflow-ellipsis;
+
+  flex-grow: 2;
+
+  .row & {
+    width: 470px;
+
+    &:has(+ .breakingSchemaChange) {
+      width: calc(470px - 22px);
+    }
+  }
+
+  .row:is(.withType) & {
+    width: 200px;
+
+    &:has(+ .breakingSchemaChange) {
+      width: calc(200px - 22px);
+    }
+  }
+}
+
+.breakingSchemaChange {
+  margin-right: 10px;
+}
+
+.cell {
+  &.update .dataType {
+    background-color: colors.$blue-40;
+    padding: variables.$spacing-sm;
+    border-radius: variables.$border-radius-xs;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: variables.$spacing-sm;
+  }
+}

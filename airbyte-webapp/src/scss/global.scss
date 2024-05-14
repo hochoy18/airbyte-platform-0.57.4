@@ -1,0 +1,39 @@
+@use "./colors";
+@use "./fonts";
+@use "./variables";
+
+@import "./theme-light";
+@import "./theme-dark";
+@import "normalize.css";
+
+:root {
+  --font-size-xs: 0.5625rem; // 9px
+  --font-size-sm: 0.75rem; // 12px
+  --font-size-md: 0.8125rem; // 13px
+  --font-size-lg: 0.875rem; // 14px
+  --show-dev-tools: initial;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  font-weight: normal;
+  -webkit-font-smoothing: antialiased;
+  color: colors.$dark-blue;
+  font-family: fonts.$primary;
+  background: colors.$backdrop;
+}
+
+button,
+input,
+textarea {
+  font-family: fonts.$primary;
+}
+
+* {
+  box-sizing: border-box;
+}

@@ -1,0 +1,425 @@
+micronaut:
+  application:
+    name: airbyte-server
+  caches:
+    # used by the analytics tracking client to cache calls to resolve the deployment and identity (workspace) for
+    # track events
+    analytics-tracking-deployments:
+      charset: "UTF-8"
+      expire-after-access: 10m
+    analytics-tracking-identity:
+      charset: "UTF-8"
+      expire-after-access: 10m
+  env:
+    cloud-deduction: true
+  executors:
+    # We set our max pool size for the config DB to 20 in 10-values.yml files at the time of writing this.
+    health:
+      type: fixed
+      n-threads: ${HEALTH_TASK_EXECUTOR_THREADS:3}
+    io:
+      type: fixed
+      n-threads: ${IO_TASK_EXECUTOR_THREADS:10}
+    public-api:
+      type: fixed
+      n-threads: ${PUBLIC_API_EXECUTOR_THREADS:5}
+    scheduler:
+      type: fixed
+      n-threads: ${SCHEDULER_TASK_EXECUTOR_THREADS:25}
+  metrics:
+    enabled: ${MICROMETER_METRICS_ENABLED:false}
+    binders:
+      netty:
+        bytebuf-allocators:
+          enabled: true
+        channels:
+          enabled: true
+        queues:
+          enabled: true
+    export:
+      statsd:
+        enabled: ${MICROMETER_METRICS_ENABLED:false}
+        flavor: ${MICROMETER_METRICS_STATSD_FLAVOR:datadog}
+        step: ${MICROMETER_METRICS_STEP:PT30S}
+        host: ${STATSD_HOST:localhost}
+        port: ${STATSD_PORT:8125}
+  security:
+    authentication-provider-strategy: ALL
+    enabled: ${API_AUTHORIZATION_ENABLED:false}
+  server:
+    port: 8001
+    cors:
+      enabled: true
+      configurations:
+        web:
+          allowed-origins-regex:
+            - ^.*$
+    netty:
+      aggregator:
+        max-content-length: 52428800 # 50MB
+      access-logger:
+        enabled: ${HTTP_ACCESS_LOG_ENABLED:true}
+      max-header-size: ${NETTY_MAX_HEADER_SIZE:32768}
+    idle-timeout: ${HTTP_IDLE_TIMEOUT:5m}
+  http:
+    client:
+      read-timeout: ${READ_TIMEOUT:10m}
+      max-content-length: 52428800 # 50MB
+      event-loop-group: http-client-event-loop
+  netty:
+    event-loops:
+      http-client-event-loop:
+        num-threads: 10
+        prefer-native-transport: true
+
+airbyte:
+  airbyte-url: ${AIRBYTE_URL:}
+  edition: ${AIRBYTE_EDITION:COMMUNITY}
+  shutdown:
+    delay_ms: 20000
+  notification:
+    customerio:
+      apikey: ${CUSTOMERIO_API_KEY:}
+  cloud:
+    storage:
+      type: ${STORAGE_TYPE}
+      bucket:
+        log: ${STORAGE_BUCKET_LOG}
+        state: ${STORAGE_BUCKET_STATE}
+        workload-output: ${STORAGE_BUCKET_WORKLOAD_OUTPUT}
+        activity-payload: ${STORAGE_BUCKET_ACTIVITY_PAYLOAD}
+      gcs:
+        application-credentials: ${GOOGLE_APPLICATION_CREDENTIALS:}
+      local:
+        root: ${LOCAL_ROOT:}
+      minio:
+        access-key: ${AWS_ACCESS_KEY_ID:}
+        endpoint: ${MINIO_ENDPOINT:}
+        secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
+      s3:
+        access-key: ${AWS_ACCESS_KEY_ID:}
+        region: ${AWS_DEFAULT_REGION:}
+        secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
+  connector:
+    specific-resource-defaults-enabled: ${CONNECTOR_SPECIFIC_RESOURCE_DEFAULTS_ENABLED:false}
+    datadog-support-names: ${CONNECTOR_DATADOG_SUPPORT_NAMES:}
+  connector-registry:
+    remote:
+      base-url: ${CONNECTOR_REGISTRY_BASE_URL:}
+      timeout-ms: ${CONNECTOR_REGISTRY_TIMEOUT_MS:30000}
+  deployment-mode: ${DEPLOYMENT_MODE:OSS}
+  feature-flag:
+    client: ${FEATURE_FLAG_CLIENT:}
+    path: ${FEATURE_FLAG_PATH:/flags}
+    api-key: ${LAUNCHDARKLY_KEY:}
+  flyway:
+    configs:
+      initialization-timeout-ms: ${CONFIGS_DATABASE_INITIALIZATION_TIMEOUT_MS:60000}
+      minimum-migration-version: ${CONFIGS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION}
+    jobs:
+      initialization-timeout-ms: ${JOBS_DATABASE_INITIALIZATION_TIMEOUT_MS:60000}
+      minimum-migration-version: ${JOBS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION}
+  version: ${AIRBYTE_VERSION:dev}
+  secret:
+    persistence: ${SECRET_PERSISTENCE:TESTING_CONFIG_DB_TABLE}
+    store:
+      aws:
+        access-key: ${AWS_SECRET_MANAGER_ACCESS_KEY_ID:}
+        secret-key: ${AWS_SECRET_MANAGER_SECRET_ACCESS_KEY:}
+        region: ${AWS_SECRET_MANAGER_REGION:}
+        kmsKeyArn: ${AWS_KMS_KEY_ARN:}
+        tags: ${AWS_SECRET_MANAGER_SECRET_TAGS:}
+      gcp:
+        credentials: ${SECRET_STORE_GCP_CREDENTIALS:}
+        project-id: ${SECRET_STORE_GCP_PROJECT_ID:}
+      vault:
+        address: ${VAULT_ADDRESS:}
+        prefix: ${VAULT_PREFIX:}
+        token: ${VAULT_AUTH_TOKEN:}
+  role: ${AIRBYTE_ROLE:dev}
+  tracking:
+    strategy: ${TRACKING_STRATEGY:LOGGING}
+    write-key: ${SEGMENT_WRITE_KEY:}
+  worker:
+    kube-job-configs:
+      default:
+        annotations: ${JOB_KUBE_ANNOTATIONS:}
+        node-selectors: ${JOB_KUBE_NODE_SELECTORS:}
+        cpu-limit: ${JOB_MAIN_CONTAINER_CPU_LIMIT:}
+        cpu-request: ${JOB_MAIN_CONTAINER_CPU_REQUEST:}
+        memory-limit: ${JOB_MAIN_CONTAINER_MEMORY_LIMIT:}
+        memory-request: ${JOB_MAIN_CONTAINER_MEMORY_REQUEST:}
+
+      # Generally low resource containers
+      destination-stderr:
+        cpu-limit: 0.5
+        cpu-request: 0.01
+        memory-limit: 50Mi
+        memory-request: 25Mi
+      destination-stdout:
+        cpu-limit: 0.5
+        cpu-request: 0.01
+        memory-limit: 50Mi
+        memory-request: 25Mi
+      heartbeat:
+        cpu-limit: 0.2
+        cpu-request: 0.05
+        memory-limit: 50Mi
+        memory-request: 25Mi
+      source-stderr:
+        cpu-limit: 0.5
+        cpu-request: 0.01
+        memory-limit: 50Mi
+        memory-request: 25Mi
+      # Default base sync values
+      destination:
+        cpu-limit: ${JOB_MAIN_CONTAINER_CPU_LIMIT:1}
+        cpu-request: ${JOB_MAIN_CONTAINER_CPU_REQUEST:0.5}
+        memory-limit: ${JOB_MAIN_CONTAINER_MEMORY_LIMIT:2Gi}
+        memory-request: ${JOB_MAIN_CONTAINER_MEMORY_REQUEST:1Gi}
+      destination-stdin:
+        cpu-limit: 1
+        cpu-request: 0.5
+        memory-limit: 50Mi
+        memory-request: 25Mi
+      orchestrator:
+        cpu-limit: ${JOB_MAIN_CONTAINER_CPU_LIMIT:1}
+        cpu-request: ${JOB_MAIN_CONTAINER_CPU_REQUEST:1}
+        memory-limit: ${JOB_MAIN_CONTAINER_MEMORY_LIMIT:2Gi}
+        memory-request: ${JOB_MAIN_CONTAINER_MEMORY_REQUEST:2Gi}
+      source:
+        cpu-limit: ${JOB_MAIN_CONTAINER_CPU_LIMIT:1}
+        cpu-request: ${JOB_MAIN_CONTAINER_CPU_REQUEST:0.5}
+        memory-limit: ${JOB_MAIN_CONTAINER_MEMORY_LIMIT:2Gi}
+        memory-request: ${JOB_MAIN_CONTAINER_MEMORY_REQUEST:1Gi}
+      source-stdout:
+        cpu-limit: 1
+        cpu-request: 0.5
+        memory-limit: 50Mi
+        memory-request: 25Mi
+      # API syncs
+      source-api:
+        cpu-limit: ${JOB_MAIN_CONTAINER_CPU_LIMIT:1}
+        cpu-request: ${JOB_MAIN_CONTAINER_CPU_REQUEST:0.2}
+        memory-limit: ${JOB_MAIN_CONTAINER_MEMORY_LIMIT:2Gi}
+        memory-request: ${JOB_MAIN_CONTAINER_MEMORY_REQUEST:1Gi}
+      source-stdout-api:
+        cpu-limit: 1
+        cpu-request: 0.2
+        memory-limit: 50Mi
+        memory-request: 25Mi
+      orchestrator-api:
+        cpu-limit: ${JOB_MAIN_CONTAINER_CPU_LIMIT:1}
+        cpu-request: ${JOB_MAIN_CONTAINER_CPU_REQUEST:1}
+        memory-limit: ${JOB_MAIN_CONTAINER_MEMORY_LIMIT:2Gi}
+        memory-request: ${JOB_MAIN_CONTAINER_MEMORY_REQUEST:2Gi}
+      destination-api:
+        cpu-limit: ${JOB_MAIN_CONTAINER_CPU_LIMIT:1}
+        cpu-request: ${JOB_MAIN_CONTAINER_CPU_REQUEST:0.2}
+        memory-limit: ${JOB_MAIN_CONTAINER_MEMORY_LIMIT:2Gi}
+        memory-request: ${JOB_MAIN_CONTAINER_MEMORY_REQUEST:1Gi}
+      destination-stdin-api:
+        cpu-limit: 1
+        cpu-request: 0.1
+        memory-limit: 50Mi
+        memory-request: 25Mi
+      # Database syncs resource override
+      source-database:
+        cpu-limit: ${JOB_MAIN_CONTAINER_CPU_LIMIT:2}
+        cpu-request: ${JOB_MAIN_CONTAINER_CPU_REQUEST:1}
+        memory-limit: ${JOB_MAIN_CONTAINER_MEMORY_LIMIT:2Gi}
+        memory-request: ${JOB_MAIN_CONTAINER_MEMORY_REQUEST:1Gi}
+      source-stdout-database:
+        cpu-limit: 1
+        cpu-request: 0.5
+        memory-limit: 50Mi
+        memory-request: 25Mi
+      orchestrator-database:
+        cpu-limit: ${JOB_MAIN_CONTAINER_CPU_LIMIT:2}
+        cpu-request: ${JOB_MAIN_CONTAINER_CPU_REQUEST:2}
+        memory-limit: ${JOB_MAIN_CONTAINER_MEMORY_LIMIT:2Gi}
+        memory-request: ${JOB_MAIN_CONTAINER_MEMORY_REQUEST:2Gi}
+      destination-database:
+        cpu-limit: ${JOB_MAIN_CONTAINER_CPU_LIMIT:2}
+        cpu-request: ${JOB_MAIN_CONTAINER_CPU_REQUEST:1}
+        memory-limit: ${JOB_MAIN_CONTAINER_MEMORY_LIMIT:2Gi}
+        memory-request: ${JOB_MAIN_CONTAINER_MEMORY_REQUEST:1Gi}
+      destination-stdin-database:
+        cpu-limit: 2
+        cpu-request: 0.5
+        memory-limit: 50Mi
+        memory-request: 25Mi
+
+    job:
+      error-reporting:
+        sentry:
+          dsn: ${JOB_ERROR_REPORTING_SENTRY_DSN}
+        strategy: ${JOB_ERROR_REPORTING_STRATEGY:LOGGING}
+      kube:
+        images:
+          busybox: ${JOB_KUBE_BUSYBOX_IMAGE:`busybox:1.28`}
+          curl: ${JOB_KUBE_CURL_IMAGE:`curlimages/curl:7.83.1`}
+          socat: ${JOB_KUBE_SOCAT_IMAGE:`alpine/socat:1.7.4.3-r0`}
+        main:
+          container:
+            image-pull-policy: ${JOB_KUBE_MAIN_CONTAINER_IMAGE_PULL_POLICY:IfNotPresent}
+            image-pull-secret: ${JOB_KUBE_MAIN_CONTAINER_IMAGE_PULL_SECRET:}
+        sidecar:
+          container:
+            image-pull-policy: ${JOB_KUBE_SIDECAR_CONTAINER_IMAGE_PULL_POLICY:IfNotPresent}
+        tolerations: ${JOB_KUBE_TOLERATIONS:}
+    isolated:
+      kube:
+        use-custom-node-selector: ${USE_CUSTOM_NODE_SELECTOR:false}
+        node-selectors: ${JOB_ISOLATED_KUBE_NODE_SELECTORS:}
+  server:
+    connection:
+      disable:
+        max-days: ${MAX_DAYS_OF_ONLY_FAILED_JOBS_BEFORE_CONNECTION_DISABLE:14}
+        max-jobs: ${MAX_FAILED_JOBS_IN_A_ROW_BEFORE_CONNECTION_DISABLE:20}
+  web-app:
+    url: ${WEBAPP_URL:}
+  workspace:
+    root: ${WORKSPACE_ROOT}
+  protocol:
+    min-version: ${AIRBYTE_PROTOCOL_VERSION_MIN:0.0.0}
+    max-version: ${AIRBYTE_PROTOCOL_VERSION_MAX:0.3.0}
+
+  # specify the minimum necessary configurations for the server to authenticate with keycloak
+  keycloak:
+    host: ${KEYCLOAK_INTERNAL_HOST:}
+    protocol: ${KEYCLOAK_PROTOCOL:http}
+    base-path: ${KEYCLOAK_BASE_PATH:`/auth`}
+    airbyte-realm: ${KEYCLOAK_AIRBYTE_REALM:airbyte}
+    web-client-id: ${KEYCLOAK_WEB_CLIENT_ID:airbyte-webapp}
+    client-realm: ${KEYCLOAK_CLIENT_REALM:airbyte}
+    client-id: ${KEYCLOAK_CLIENT_ID:admin-cli}
+    realm: ${KEYCLOAK_REALM:master}
+    username: ${KEYCLOAK_ADMIN_USER:airbyteAdmin}
+    password: ${KEYCLOAK_ADMIN_PASSWORD:keycloak123}
+
+  # Airbyte API
+  api:
+    host: ${AIRBYTE_API_HOST}
+  internal:
+    documentation:
+      host: https://reference.airbyte.com/
+
+  connector-builder-server-api:
+    base-path: ${CONNECTOR_BUILDER_SERVER_API_HOST:}
+    connect-timeout-seconds: ${CONNECTOR_BUILDER_SERVER_API_CONNECT_TIMEOUT_SECONDS:30}
+    read-timeout-seconds: ${CONNECTOR_BUILDER_SERVER_API_READ_TIMEOUT_SECONDS:300}
+  internal-api:
+    auth-header:
+      name: ${AIRBYTE_API_AUTH_HEADER_NAME:}
+      value: ${AIRBYTE_API_AUTH_HEADER_VALUE:}
+
+temporal:
+  cloud:
+    client:
+      cert: ${TEMPORAL_CLOUD_CLIENT_CERT:}
+      key: ${TEMPORAL_CLOUD_CLIENT_KEY:}
+    enabled: ${TEMPORAL_CLOUD_ENABLED:false}
+    host: ${TEMPORAL_CLOUD_HOST:}
+    namespace: ${TEMPORAL_CLOUD_NAMESPACE:}
+  host: ${TEMPORAL_HOST:`airbyte-temporal:7233`}
+  retention: ${TEMPORAL_HISTORY_RETENTION_IN_DAYS:30}
+  sdk:
+    timeouts:
+      rpc-timeout: ${TEMPORAL_SDK_RPC_TIMEOUT:60s}
+      rpc-long-poll-timeout: ${TEMPORAL_SDK_RPC_LONG_POLL_TIMEOUT:70s}
+      rpc-query-timeout: ${TEMPORAL_SDK_RPC_QUERY_TIMEOUT:10s}
+
+datasources:
+  config:
+    connection-test-query: SELECT 1
+    connection-timeout: 30000
+    maximum-pool-size: ${CONFIG_DB_MAX_POOL_SIZE:10}
+    minimum-idle: 0
+    idle-timeout: 600000
+    initialization-fail-timeout: -1 # Disable fail fast checking to avoid issues due to other pods not being started in time
+    url: ${DATABASE_URL}
+    driverClassName: org.postgresql.Driver
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    leak-detection-threshold: 40000 # This should be slightly higher than the connection-timeout setting but not too high to avoid false positives and negatives.
+  local-secrets:
+    connection-test-query: SELECT 1
+    connection-timeout: 30000
+    idle-timeout: 600000
+    initialization-fail-timeout: -1 # Disable fail fast checking to avoid issues due to other pods not being started in time
+    maximum-pool-size: 20
+    minimum-idle: 0
+    url: ${DATABASE_URL}
+    driverClassName: org.postgresql.Driver
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    pool-name: config-pool
+
+endpoints:
+  beans:
+    enabled: true
+    sensitive: false
+  caches:
+    enabled: true
+    sensitive: false
+  env:
+    enabled: true
+    sensitive: false
+  health:
+    enabled: false
+    jdbc:
+      enabled: false
+    sensitive: false
+  info:
+    enabled: true
+    sensitive: true
+  loggers:
+    enabled: true
+    sensitive: false
+  metrics:
+    enabled: ${MICROMETER_METRICS_ENABLED:false}
+    sensitive: false
+  refresh:
+    enabled: false
+    sensitive: true
+  routes:
+    enabled: true
+    sensitive: false
+  threaddump:
+    enabled: true
+    sensitive: true
+
+flyway:
+  enabled: true
+  datasources:
+    config:
+      enabled: false
+      locations:
+        - "classpath:io/airbyte/db/instance/configs/migrations"
+    jobs:
+      enabled: false
+      locations:
+        - "classpath:io/airbyte/db/instance/jobs/migrations"
+
+jooq:
+  datasources:
+    config:
+      jackson-converter-enabled: true
+      sql-dialect: POSTGRES
+    jobs:
+      jackson-converter-enabled: true
+      sql-dialect: POSTGRES
+    local-secrets:
+      jackson-converter-enabled: true
+      sql-dialect: POSTGRES
+
+logger:
+  levels:
+  # Uncomment to help resolve issues with conditional beans
+  #    io.micronaut.context.condition: DEBUG
+  # Uncomment to help resolve issues with security beans
+  #    io.micronaut.security: DEBUG
+  # Uncomment to help resolve issues with micronaut data
+  #    com.zaxxer.hikari.HikariConfig: DEBUG
+  #    com.zaxxer.hikari: TRACE

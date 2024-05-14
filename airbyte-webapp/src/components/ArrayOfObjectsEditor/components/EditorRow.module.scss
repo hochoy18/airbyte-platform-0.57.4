@@ -1,0 +1,31 @@
+@use "scss/colors";
+@use "scss/variables";
+
+.container {
+  border-top: 1px solid colors.$foreground;
+  background-color: colors.$grey-50;
+}
+
+.body {
+  color: colors.$dark-blue;
+  padding: variables.$spacing-xs variables.$spacing-md;
+  min-width: 0;
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tooltipContainer {
+  width: 100%;
+}
+
+.dragHandle {
+  cursor: grab;
+
+  &[aria-pressed="true"] {
+    cursor: grabbing;
+  }
+}

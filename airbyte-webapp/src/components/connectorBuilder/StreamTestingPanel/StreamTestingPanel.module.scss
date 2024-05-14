@@ -1,0 +1,41 @@
+@use "scss/variables";
+@use "scss/colors";
+
+.container {
+  padding: variables.$spacing-lg;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: variables.$spacing-lg;
+}
+
+.testingValues {
+  width: 100%;
+}
+
+.streamSelector {
+  flex: 0 0 auto;
+  height: variables.$button-height-sm;
+}
+
+.loadingSpinner {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addStreamMessage {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.addStreamHeading {
+  color: colors.$dark-blue;
+}

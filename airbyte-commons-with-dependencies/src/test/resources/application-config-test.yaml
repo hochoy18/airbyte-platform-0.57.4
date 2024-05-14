@@ -1,0 +1,72 @@
+sanity-check: test config
+airbyte:
+  role: tester
+  version: latest
+  worker:
+    kube-job-configs:
+      default:
+        cpu-limit: default cpu limit
+        cpu-request: ${JOB_MAIN_CONTAINER_CPU_REQUEST:}
+        memory-request: ${JOB_MAIN_CONTAINER_MEMORY_REQUEST:}
+      check:
+        annotations: ${CHECK_JOB_KUBE_ANNOTATIONS:check annotations}
+        labels: ${CHECK_JOB_KUBE_LABELS:check labels}
+        node-selectors: ${CHECK_JOB_KUBE_NODE_SELECTORS:check node-selectors}
+        cpu-limit: ${CHECK_JOB_MAIN_CONTAINER_CPU_LIMIT:check cpu limit}
+        cpu-request: ${CHECK_JOB_MAIN_CONTAINER_CPU_REQUEST:check cpu request}
+        memory-limit: ${CHECK_JOB_MAIN_CONTAINER_MEMORY_LIMIT:check mem limit}
+        memory-request: ${CHECK_JOB_MAIN_CONTAINER_MEMORY_REQUEST:check mem request}
+      spec:
+        annotations: ${SPEC_JOB_KUBE_ANNOTATIONS:spec annotations}
+        labels: ${SPEC_JOB_KUBE_LABELS:spec labels}
+        node-selectors: ${SPEC_JOB_KUBE_NODE_SELECTORS:spec node selectors}
+        memory-limit: spec memory limit
+        memory-request: ${SOMETHING_NOT_THERE:}
+      source:
+        cpu-request: 0.5
+        cpu-limit: "" # This unsets the value from the inherited test file to test defaults
+      source-database:
+        cpu-request: 1
+        cpu-limit: "" # This unsets the value from the inherited test file to test defaults
+      orchestrator-api:
+        cpu-request: 11
+      destination-api:
+        cpu-request: 12
+      variantwithnumb3rz-source: # Making sure we support numbers
+        cpu-request: 13
+      incompletevariant-source-api:
+        cpu-request: 42
+      micronauttest-source:
+        cpu-limit: 5
+      micronauttest-source-database:
+        cpu-limit: 10
+      mappingtest-source-stderr:
+        memory-limit: 101
+      mappingtest-source-stdout:
+        memory-limit: 102
+      mappingtest-destination-stderr:
+        memory-limit: 103
+      mappingtest-destination-stdin:
+        memory-limit: 104
+      mappingtest-destination-stdout:
+        memory-limit: 105
+      mappingtest-heartbeat:
+        memory-limit: 106
+    job:
+      kube:
+        images:
+          busybox: ${UNUSED_VALUE:}
+          curl: ${UNUSED_VALUE:}
+          socat: ${UNUSED_VALUE:}
+        main:
+          container:
+            image-pull-policy: ${UNUSED_VALUE:}
+            image-pull-secret: ${UNUSED_VALUE:}
+        sidecar:
+          container:
+            image-pull-policy: ${UNUSED_VALUE:}
+        tolerations: ${UNUSED_VALUE:}
+    isolated:
+      kube:
+        use-custom-node-selector: ${UNUSED_VALUE:}
+        node-selectors: ${UNUSED_VALUE:}

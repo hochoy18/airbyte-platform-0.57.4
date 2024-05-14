@@ -1,0 +1,6 @@
+@use "scss/variables";
+
+.container {
+  text-align: center;
+  margin-top: variables.$spacing-lg;
+}

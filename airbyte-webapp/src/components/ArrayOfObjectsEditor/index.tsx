@@ -1,0 +1,1 @@
+export { ArrayOfObjectsEditor } from "./ArrayOfObjectsEditor";

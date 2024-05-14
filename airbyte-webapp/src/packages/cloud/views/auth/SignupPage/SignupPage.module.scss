@@ -1,0 +1,23 @@
+@use "scss/colors";
+@use "scss/variables";
+
+.container {
+  max-width: variables.$width-login-form;
+  margin: auto;
+}
+
+.checkIcon {
+  color: colors.$dark-blue-200;
+}
+
+.details {
+  align-self: center;
+  @media (width >= 500px) {
+    flex-direction: row;
+  }
+}
+
+.detailTextContainer {
+  min-width: fit-content;
+  color: colors.$dark-blue;
+}

@@ -1,0 +1,265 @@
+micronaut:
+  application:
+    name: airbyte-workload-launcher
+  env:
+    cloud-deduction: true
+  server:
+    port: 8016
+    netty:
+      access-logger:
+        enabled: ${HTTP_ACCESS_LOG_ENABLED:false}
+    idle-timeout: ${HTTP_IDLE_TIMEOUT:10m}
+  metrics:
+    enabled: ${MICROMETER_METRICS_ENABLED:false}
+    export:
+      statsd:
+        enabled: ${MICROMETER_METRICS_ENABLED:false}
+        flavor: ${MICROMETER_METRICS_STATSD_FLAVOR:datadog}
+        step: ${MICROMETER_METRICS_STEP:PT30S}
+        host: ${STATSD_HOST:localhost}
+        port: ${STATSD_PORT:8125}
+
+airbyte:
+  connector:
+    source:
+      credentials:
+        aws:
+          assumed-role:
+            # These properties represent the AWS assume role credentials used to connect to an AWS source
+            #  using Airbyte's IAM role
+            access-key: AWS_ACCESS_KEY_ID
+            secret-key: AWS_SECRET_ACCESS_KEY
+            secret-name: ${AWS_ASSUME_ROLE_SECRET_NAME:}
+  control-plane-auth-endpoint: ${CONTROL_PLANE_AUTH_ENDPOINT:}
+  data-plane-id: ${DATA_PLANE_ID}
+  data-plane-name: ${DATA_PLANE_NAME:default-data-plane}
+  feature-flag:
+    client: ${FEATURE_FLAG_CLIENT:}
+    path: ${FEATURE_FLAG_PATH:/flags}
+    api-key: ${LAUNCHDARKLY_KEY:}
+  kubernetes:
+    client:
+      call-timeout-sec: ${KUBERNETES_CLIENT_CALL_TIMEOUT_SECONDS:30}
+      connect-timeout-sec: ${KUBERNETES_CLIENT_CONNECT_TIMEOUT_SECONDS:30}
+      read-timeout-sec: ${KUBERNETES_CLIENT_READ_TIMEOUT_SECONDS:30}
+      write-timeout-sec: ${KUBERNETES_CLIENT_WRITE_TIMEOUT_SECONDS:30}
+      connection-pool:
+        keep-alive-sec: ${KUBERNETES_CLIENT_CONNECTION_KEEP_ALIVE_SECONDS:600}
+        max-idle-connections: ${KUBERNETES_CLIENT_MAX_IDLE_CONNECTIONS:25}
+      retries:
+        delay-seconds: ${KUBERNETES_CLIENT_RETRY_DELAY_SECONDS:2}
+        max: ${KUBERNETES_CLIENT_MAX_RETRIES:5}
+    resource-check-rate: ${WORKLOAD_LAUNCHER_POD_PENDING_RESOURCE_CHECK_RATE:PT30S}
+  docker:
+    docker-socket: ${DOCKER_SOCKET:}
+    network: ${DOCKER_NETWORK:host}
+    workspace-mount-name: ${WORKSPACE_DOCKER_MOUNT:}
+    workspace-mount-path: ${WORKSPACE_ROOT}
+    local-mount-name: ${LOCAL_DOCKER_MOUNT:}
+    local-mount-path: ${LOCAL_ROOT}
+  workload-api:
+    base-path: ${WORKLOAD_API_HOST:}
+    bearer-token: ${WORKLOAD_API_BEARER_TOKEN:}
+    bearer-token-secret-key: ${WORKLOAD_API_BEARER_TOKEN_SECRET_KEY:}
+    bearer-token-secret-name: ${WORKLOAD_API_BEARER_TOKEN_SECRET_NAME:}
+    connect-timeout-seconds: ${WORKLOAD_API_CONNECT_TIMEOUT_SECONDS:30}
+    read-timeout-seconds: ${WORKLOAD_API_READ_TIMEOUT_SECONDS:300}
+    retries:
+      delay-seconds: ${WORKLOAD_API_RETRY_DELAY_SECONDS:2}
+      max: ${WORKLOAD_API_MAX_RETRIES:5}
+  workload-launcher:
+    geography: ${WORKLOAD_LAUNCHER_GEOGRAPHY:auto}
+    workload-start-timeout: ${WORKLOAD_LAUNCHER_WORKLOAD_START_TIMEOUT:PT5H}
+    temporal:
+      default-queue:
+        parallelism: ${WORKLOAD_LAUNCHER_PARALLELISM:10}
+        workflow-parallelism: ${WORKLOAD_LAUNCHER_WORKFLOW_PARALLELISM:10}
+      high-priority-queue:
+        parallelism: ${WORKLOAD_LAUNCHER_PARALLELISM:10}
+        workflow-parallelism: ${WORKLOAD_LAUNCHER_WORKFLOW_PARALLELISM:10}
+  secret:
+    persistence: ${SECRET_PERSISTENCE}
+    store:
+      aws:
+        access-key: ${AWS_ACCESS_KEY:}
+        secret-key: ${AWS_SECRET_ACCESS_KEY:}
+        region: ${AWS_REGION:}
+      gcp:
+        credentials: ${SECRET_STORE_GCP_CREDENTIALS:}
+        project-id: ${SECRET_STORE_GCP_PROJECT_ID:}
+      vault:
+        address: ${VAULT_ADDRESS:}
+        prefix: ${VAULT_PREFIX:}
+        token: ${VAULT_AUTH_TOKEN:}
+  version: ${AIRBYTE_VERSION}
+  container.orchestrator:
+    data-plane-creds:
+      secret-mount-path: ${CONTAINER_ORCHESTRATOR_DATA_PLANE_CREDS_SECRET_MOUNT_PATH:}
+      secret-name: ${CONTAINER_ORCHESTRATOR_DATA_PLANE_CREDS_SECRET_NAME:}
+    image: ${CONTAINER_ORCHESTRATOR_IMAGE:}
+    java-opts: ${CONTAINER_ORCHESTRATOR_JAVA_OPTS:}
+    secret-mount-path: ${CONTAINER_ORCHESTRATOR_SECRET_MOUNT_PATH:}
+    secret-name: ${CONTAINER_ORCHESTRATOR_SECRET_NAME:}
+  role: ${AIRBYTE_ROLE:}
+  deployment-mode: ${DEPLOYMENT_MODE:OSS}
+  worker:
+    job:
+      error-reporting:
+        sentry:
+          dsn: ${JOB_ERROR_REPORTING_SENTRY_DSN}
+        strategy: ${JOB_ERROR_REPORTING_STRATEGY:LOGGING}
+      kube:
+        images:
+          busybox: ${JOB_KUBE_BUSYBOX_IMAGE:`busybox:1.35`}
+          curl: ${JOB_KUBE_CURL_IMAGE:`curlimages/curl:7.83.1`}
+          socat: ${JOB_KUBE_SOCAT_IMAGE:`alpine/socat:1.7.4.3-r0`}
+        main:
+          container:
+            image-pull-policy: ${JOB_KUBE_MAIN_CONTAINER_IMAGE_PULL_POLICY:IfNotPresent}
+            image-pull-secret: ${JOB_KUBE_MAIN_CONTAINER_IMAGE_PULL_SECRET:}
+        namespace: ${JOB_KUBE_NAMESPACE:default}
+        serviceAccount: ${JOB_KUBE_SERVICEACCOUNT:airbyte-admin} # by default, Airbyte on Kube ships with the `airbyte-admin` service account. If that ever changes, this default should change with it
+        tolerations: ${JOB_KUBE_TOLERATIONS:}
+        sidecar:
+          container:
+            image-pull-policy: ${JOB_KUBE_SIDECAR_CONTAINER_IMAGE_PULL_POLICY:IfNotPresent}
+    kube-job-configs:
+      default:
+        annotations: ${JOB_KUBE_ANNOTATIONS:}
+        labels: ${JOB_KUBE_LABELS:}
+        node-selectors: ${JOB_KUBE_NODE_SELECTORS:}
+        cpu-limit: ${JOB_MAIN_CONTAINER_CPU_LIMIT:}
+        cpu-request: ${JOB_MAIN_CONTAINER_CPU_REQUEST:}
+        memory-limit: ${JOB_MAIN_CONTAINER_MEMORY_LIMIT:}
+        memory-request: ${JOB_MAIN_CONTAINER_MEMORY_REQUEST:}
+      check:
+        annotations: ${CHECK_JOB_KUBE_ANNOTATIONS:}
+        labels: ${CHECK_JOB_KUBE_LABELS:}
+        node-selectors: ${CHECK_JOB_KUBE_NODE_SELECTORS:}
+        cpu-limit: ${CHECK_JOB_MAIN_CONTAINER_CPU_LIMIT:}
+        cpu-request: ${CHECK_JOB_MAIN_CONTAINER_CPU_REQUEST:}
+        memory-limit: ${CHECK_JOB_MAIN_CONTAINER_MEMORY_LIMIT:}
+        memory-request: ${CHECK_JOB_MAIN_CONTAINER_MEMORY_REQUEST:}
+      discover:
+        annotations: ${DISCOVER_JOB_KUBE_ANNOTATIONS:}
+        labels: ${DISCOVER_JOB_KUBE_LABELS:}
+        node-selectors: ${DISCOVER_JOB_KUBE_NODE_SELECTORS:}
+        cpu-limit: ${DISCOVER_JOB_MAIN_CONTAINER_CPU_LIMIT:}
+        cpu-request: ${DISCOVER_JOB_MAIN_CONTAINER_CPU_REQUEST:}
+        memory-limit: ${DISCOVER_JOB_MAIN_CONTAINER_MEMORY_LIMIT:}
+        memory-request: ${DISCOVER_JOB_MAIN_CONTAINER_MEMORY_REQUEST:}
+      spec:
+        annotations: ${SPEC_JOB_KUBE_ANNOTATIONS:}
+        labels: ${SPEC_JOB_KUBE_LABELS:}
+        node-selectors: ${SPEC_JOB_KUBE_NODE_SELECTORS:}
+        cpu-limit: ${SPEC_JOB_MAIN_CONTAINER_CPU_LIMIT:}
+        cpu-request: ${SPEC_JOB_MAIN_CONTAINER_CPU_REQUEST:}
+        memory-limit: ${SPEC_JOB_MAIN_CONTAINER_MEMORY_LIMIT:}
+        memory-request: ${SPEC_JOB_MAIN_CONTAINER_MEMORY_REQUEST:}
+    connector-sidecar:
+      resources:
+        cpu-limit: ${SIDECAR_MAIN_CONTAINER_CPU_LIMIT:}
+        cpu-request: ${SIDECAR_MAIN_CONTAINER_CPU_REQUEST:}
+        memory-limit: ${SIDECAR_MAIN_CONTAINER_MEMORY_LIMIT:}
+        memory-request: ${SIDECAR_MAIN_CONTAINER_MEMORY_REQUEST:}
+    isolated:
+      kube:
+        use-custom-node-selector: ${USE_CUSTOM_NODE_SELECTOR:false}
+        node-selectors: ${JOB_ISOLATED_KUBE_NODE_SELECTORS:}
+  metric:
+    client: ${METRIC_CLIENT:}
+    should-publish: ${PUBLISH_METRICS:false}
+  internal:
+    api:
+      host: ${INTERNAL_API_HOST}
+      auth-header:
+        name: ${AIRBYTE_API_AUTH_HEADER_NAME:}
+        value: ${AIRBYTE_API_AUTH_HEADER_VALUE:}
+  data.plane.service-account:
+    credentials-path: ${DATA_PLANE_SERVICE_ACCOUNT_CREDENTIALS_PATH:}
+    email: ${DATA_PLANE_SERVICE_ACCOUNT_EMAIL:}
+  control.plane.auth-endpoint: ${CONTROL_PLANE_AUTH_ENDPOINT:}
+  acceptance.test.enabled: ${ACCEPTANCE_TEST_ENABLED:false}
+  cloud:
+    storage:
+      type: ${STORAGE_TYPE}
+      bucket:
+        log: ${STORAGE_BUCKET_LOG}
+        state: ${STORAGE_BUCKET_STATE}
+        workload-output: ${STORAGE_BUCKET_WORKLOAD_OUTPUT}
+        activity-payload: ${STORAGE_BUCKET_ACTIVITY_PAYLOAD}
+      gcs:
+        application-credentials: ${GOOGLE_APPLICATION_CREDENTIALS:}
+      local:
+        root: ${LOCAL_ROOT:}
+      minio:
+        access-key: ${AWS_ACCESS_KEY_ID:}
+        endpoint: ${MINIO_ENDPOINT:}
+        secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
+      s3:
+        access-key: ${AWS_ACCESS_KEY_ID:}
+        region: ${AWS_DEFAULT_REGION:}
+        secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
+  workspace:
+    docker-mount: ${WORKSPACE_DOCKER_MOUNT:}
+    root: ${WORKSPACE_ROOT}
+
+datadog:
+  agent:
+    host: ${DD_AGENT_HOST:}
+    port: ${DD_DOGSTATSD_PORT:}
+  orchestrator.disabled.integrations: ${DD_ORCHESTRATOR_DISABLED_INTEGRATIONS:GRPC,GRPC_CLIENT,GRPC_SERVER,NETTY,NETTY_4_1,GOOGLE_HTTP_CLIENT,HTTPURLCONNECTION,URLCONNECTION}
+google.application.credentials: ${GOOGLE_APPLICATION_CREDENTIALS:}
+
+endpoints:
+  beans:
+    enabled: true
+    sensitive: false
+  env:
+    enabled: true
+    sensitive: false
+  health:
+    enabled: true
+    jdbc:
+      enabled: false
+    sensitive: false
+  info:
+    enabled: true
+    sensitive: true
+  loggers:
+    enabled: true
+    sensitive: false
+  metrics:
+    enabled: ${MICROMETER_METRICS_ENABLED:false}
+    sensitive: false
+  refresh:
+    enabled: false
+    sensitive: true
+  routes:
+    enabled: true
+    sensitive: false
+  threaddump:
+    enabled: true
+    sensitive: false
+
+temporal:
+  cloud:
+    client:
+      cert: ${TEMPORAL_CLOUD_CLIENT_CERT:}
+      key: ${TEMPORAL_CLOUD_CLIENT_KEY:}
+    enabled: ${TEMPORAL_CLOUD_ENABLED:false}
+    host: ${TEMPORAL_CLOUD_HOST:}
+    namespace: ${TEMPORAL_CLOUD_NAMESPACE:}
+  host: ${TEMPORAL_HOST:`airbyte-temporal:7233`}
+  retention: ${TEMPORAL_HISTORY_RETENTION_IN_DAYS:30}
+  sdk:
+    timeouts:
+      rpc-timeout: ${TEMPORAL_SDK_RPC_TIMEOUT:60s}
+      rpc-long-poll-timeout: ${TEMPORAL_SDK_RPC_LONG_POLL_TIMEOUT:70s}
+      rpc-query-timeout: ${TEMPORAL_SDK_RPC_QUERY_TIMEOUT:10s}
+
+logger:
+  levels:
+#   Uncomment to help resolve issues with conditional beans
+#      io.micronaut.context.condition: DEBUG
+

@@ -1,0 +1,83 @@
+@use "scss/colors";
+@use "scss/variables";
+@use "scss/z-indices";
+
+@keyframes fade-in-container {
+  from {
+    opacity: 0;
+  }
+}
+
+.modalPageContainer {
+  position: absolute;
+  z-index: z-indices.$modal;
+}
+
+.modalContainer {
+  z-index: z-indices.$modal;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  animation: fade-in-container 0.2s ease-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &--noSidebarOffset {
+    margin-left: 0;
+  }
+}
+
+.modalPanel {
+  max-height: 100%;
+  display: flex;
+}
+
+.card {
+  position: relative;
+  background: colors.$foreground;
+  border-radius: variables.$border-radius-lg;
+  max-width: calc(100vw - #{variables.$spacing-lg} * 2);
+  display: flex;
+  flex-direction: column;
+
+  &.sm {
+    width: variables.$width-modal-sm;
+  }
+
+  &.md {
+    width: variables.$width-modal-md;
+  }
+
+  &.lg {
+    width: variables.$width-modal-lg;
+  }
+
+  &.xl {
+    width: variables.$width-modal-xl;
+  }
+
+  &.full {
+    margin-left: 0;
+    max-width: 100%;
+    width: calc(100vw - #{variables.$spacing-xl} * 2);
+    height: calc(100vh - #{variables.$spacing-xl} * 2);
+  }
+
+  &__header {
+    border-bottom: variables.$border-thin solid colors.$grey-100;
+  }
+
+  &__closeButton {
+    background-color: transparent;
+    border: none;
+    padding: variables.$spacing-xl;
+    cursor: pointer;
+    color: colors.$dark-blue;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

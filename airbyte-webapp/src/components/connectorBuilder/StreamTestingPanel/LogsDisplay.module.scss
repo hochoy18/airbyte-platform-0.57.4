@@ -1,0 +1,28 @@
+@use "scss/colors";
+@use "scss/variables";
+
+.container {
+  padding: variables.$spacing-sm;
+  overflow-y: auto;
+}
+
+.error {
+  color: colors.$red;
+  font-size: variables.$font-size-lg;
+}
+
+.warning {
+  color: colors.$yellow;
+}
+
+.level {
+  flex-basis: 50px;
+  flex-shrink: 0;
+}
+
+.message {
+  & > pre {
+    white-space: break-spaces;
+    margin: 0;
+  }
+}

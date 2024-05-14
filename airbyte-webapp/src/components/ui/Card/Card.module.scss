@@ -1,0 +1,80 @@
+@use "scss/colors";
+@use "scss/variables";
+@use "scss/mixins";
+
+$default-border-radius: variables.$border-radius-lg;
+$default-padding: variables.$spacing-xl;
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  color: colors.$dark-blue;
+  padding: $default-padding $default-padding 0 $default-padding;
+  border-top-left-radius: $default-border-radius;
+  border-top-right-radius: $default-border-radius;
+
+  .helpText {
+    color: colors.$grey-400;
+  }
+
+  &.withBorderBottom {
+    border-bottom: colors.$grey-100 variables.$border-thin solid;
+    padding-bottom: $default-padding;
+  }
+
+  &.withPaddingBottom {
+    padding-bottom: $default-padding;
+  }
+}
+
+.cardBody {
+  padding: $default-padding;
+  background: colors.$foreground;
+  border-radius: variables.$border-radius-lg;
+}
+
+.container {
+  @include mixins.shadow;
+
+  width: auto;
+  background: colors.$foreground;
+  border-radius: variables.$border-radius-lg;
+
+  &:has(.cardBody:empty) .cardHeader {
+    // apply the bottom border to the header only if it has a rendered sibling (the card content)
+    // checking for `children` in tsx isn't enough as the passed child can return null
+    border-bottom: 0;
+  }
+
+  &:has(.cardBody:empty) .cardBody {
+    // same here, don't show empty card body
+    padding: 0;
+  }
+
+  &.inset {
+    @include mixins.shadow-inset;
+  }
+}
+
+.headerBtn {
+  all: unset;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+
+  .icon {
+    transition: variables.$transition;
+
+    &.expanded {
+      transform: rotate(90deg);
+    }
+  }
+}
+
+.noPadding {
+  padding: 0;
+}
+
+.infoTooltip {
+  color: colors.$foreground;
+}

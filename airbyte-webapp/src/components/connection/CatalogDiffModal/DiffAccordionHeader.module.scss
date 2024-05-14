@@ -1,0 +1,20 @@
+@forward "./StreamRow.module.scss";
+@forward "./DiffSection.module.scss";
+@use "scss/colors";
+@use "scss/variables";
+
+.row {
+  padding: 0 0 0 variables.$spacing-sm;
+}
+
+.namespace {
+  padding-left: variables.$spacing-sm;
+}
+
+.grey {
+  color: colors.$grey-300;
+}
+
+.name {
+  width: 290px;
+}

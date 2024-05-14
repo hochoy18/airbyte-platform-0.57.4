@@ -1,0 +1,7 @@
+@use "scss/colors";
+@use "scss/variables";
+
+.internalFailureContainer {
+  border-radius: variables.$border-radius-md;
+  padding-bottom: variables.$spacing-md;
+}

@@ -1,0 +1,76 @@
+@use "scss/colors";
+@use "scss/variables";
+@use "scss/z-indices";
+
+.items {
+  z-index: z-indices.$dropdownMenu;
+  overflow: auto;
+  max-height: 300px;
+  outline: none;
+  border-radius: variables.$border-radius-md;
+  background-color: colors.$foreground;
+  box-shadow: variables.$box-shadow-menu;
+
+  &:focus-within {
+    outline: none;
+  }
+}
+
+.separator {
+  border-bottom: variables.$border-thin solid colors.$grey-100;
+  margin: variables.$spacing-xs variables.$spacing-xs;
+}
+
+.item {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  height: 42px;
+  width: 100%;
+  padding: 0 variables.$spacing-xl;
+  border: 0;
+  background-color: transparent;
+  text-decoration: none;
+
+  .icon {
+    display: flex;
+    align-items: center;
+    font-size: 22px;
+    color: colors.$dark-blue;
+    width: 20px;
+    flex-shrink: 0;
+  }
+
+  .text {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+  }
+
+  &.active {
+    background-color: colors.$blue-50;
+  }
+
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.25;
+  }
+
+  &.iconPositionRight {
+    flex-direction: row-reverse;
+
+    .icon {
+      margin-left: variables.$spacing-md;
+    }
+  }
+
+  &.iconPositionLeft {
+    flex-direction: row;
+
+    .icon {
+      margin-right: variables.$spacing-md;
+    }
+  }
+}
